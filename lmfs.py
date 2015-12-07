@@ -2,8 +2,19 @@
 
 import errno
 from fuse import FUSE, FuseOSError, Operations
+from getpass import getpass
 import os
+from pysqlcipher3 import dbapi2 as sqlite
+from simplecrypt import encrypt, decrypt
 import sys
+
+def lmfs_init():
+    lmfs_dir = os.path.expanduser('~') + "/.config/lmfs"
+    if not os.path.isdir(lmfs_dir):
+        os.makedirs(lmfs_dir)
+    lmfs_header = lmfs_dir + "/header.lmfs"
+    with open(lmfs_header, 'a'):
+        os.utime(lmfs_header, None)
 
 class lmfs(Operations):
     def __init__(self, root):
@@ -124,6 +135,7 @@ class lmfs(Operations):
 
 
 def main(mountpoint, root):
+    lmfs_init()
     FUSE(lmfs(root), mountpoint, nothreads=True, foreground=True)
 
 if __name__ == '__main__':
